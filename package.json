@@ -1,0 +1,10 @@
+{
+  "name": "serino-inventory",
+  "version": "1.0.0",
+  "description": "Full-stack Inventory Management System",
+  "scripts": {
+    "install:all": "npm --prefix inventory/server install && npm --prefix inventory/client install",
+    "server": "npm --prefix inventory/server start",
+    "client": "npm --prefix inventory/client run dev"
+  }
+}
