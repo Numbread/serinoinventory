@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "description": "Full-stack Inventory Management System",
   "scripts": {
+    "build": "npm --prefix inventory/client install && npm --prefix inventory/client run build && npm --prefix inventory/server install",
+    "start": "node inventory/server/server.js",
     "install:all": "npm --prefix inventory/server install && npm --prefix inventory/client install",
     "server": "npm --prefix inventory/server start",
     "client": "npm --prefix inventory/client run dev"

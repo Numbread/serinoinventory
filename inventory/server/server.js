@@ -2,8 +2,8 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-
 const path = require('path');
+const fs = require('fs');
 
 // Load environment variables from .env
 dotenv.config({ path: path.join(__dirname, '.env') });
@@ -21,16 +21,11 @@ const dashboardRoutes = require('./routes/dashboardRoutes');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Enable Cross-Origin Resource Sharing so React client can call this API
+// Enable Cross-Origin Resource Sharing
 app.use(cors());
 
 // Parse JSON request bodies
 app.use(express.json());
-
-// Basic health check route
-app.get('/', (req, res) => {
-  res.json({ message: 'Inventory Management System API is running.' });
-});
 
 // Authentication routes (public)
 app.use('/auth', authRoutes);
@@ -49,10 +44,27 @@ app.use('/api/stock', verifyToken, stockRoutes);
 app.use('/dashboard', verifyToken, dashboardRoutes);
 app.use('/api/dashboard', verifyToken, dashboardRoutes);
 
-// Catch-all 404 handler for unknown endpoints
-app.use((req, res) => {
-  res.status(404).json({ message: 'Requested API endpoint not found.' });
-});
+// Check if frontend production build exists (in client/dist)
+const clientDistPath = path.join(__dirname, '../client/dist');
+if (fs.existsSync(clientDistPath)) {
+  // Serve compiled React frontend assets
+  app.use(express.static(clientDistPath));
+
+  // Client-side SPA routing: all non-API paths serve index.html
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(clientDistPath, 'index.html'));
+  });
+} else {
+  // Fallback API health check when running in decoupled dev mode
+  app.get('/', (req, res) => {
+    res.json({ message: 'Inventory Management System API is running.' });
+  });
+
+  // Catch-all 404 handler for unknown endpoints
+  app.use((req, res) => {
+    res.status(404).json({ message: 'Requested API endpoint not found.' });
+  });
+}
 
 // Global error handling middleware
 app.use((err, req, res, next) => {
